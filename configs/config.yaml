@@ -1,5 +1,6 @@
 batch_size: 128
 epochs: 1
+weight_decay: 1e-4
 lr: 0.001
 
 device: cuda:0
