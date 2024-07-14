@@ -57,7 +57,7 @@ class ConvBlock(nn.Module):
         self.batchnorm0 = nn.BatchNorm1d(num_features=out_dim)
         self.batchnorm1 = nn.BatchNorm1d(num_features=out_dim)
 
-        self.dropout = nn.Dropout(0.1)  # ドロップアウト率を定数として設定
+        self.dropout = nn.Dropout(p_drop)  # ドロップアウト率を定数として設定
 
     def forward(self, X: torch.Tensor) -> torch.Tensor:
         if self.in_dim == self.out_dim:
@@ -66,11 +66,9 @@ class ConvBlock(nn.Module):
             X = self.conv0(X)
 
         X = F.gelu(self.batchnorm0(X))
-        X = self.dropout(X)  # ドロップアウトを追加
 
         X = self.conv1(X) + X  # skip connection
         X = F.gelu(self.batchnorm1(X))
-        X = self.dropout(X)  # ドロップアウトを追加
 
         # X = self.conv2(X)
         # X = F.glu(X, dim=-2)
