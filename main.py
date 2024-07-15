@@ -2,6 +2,7 @@ import os, sys
 import numpy as np
 import torch
 import torch.nn.functional as F
+import torch.optim.lr_scheduler as lr_scheduler
 from torchmetrics import Accuracy
 import hydra
 from omegaconf import DictConfig
@@ -9,8 +10,8 @@ import wandb
 from termcolor import cprint
 from tqdm import tqdm
 
-from src.datasets_def import ThingsMEGDataset
-#from src.datasets import ThingsMEGDataset
+#from src.datasets_def import ThingsMEGDataset
+from src.datasets import ThingsMEGDataset
 
 from src.models import BasicConvClassifier
 #from src.models_def import BasicConvClassifier
@@ -51,6 +52,12 @@ def run(args: DictConfig):
     #     Optimizer
     # ------------------
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    
+    #-------------------
+    # スケジューラ
+    #-------------------
+    
+    scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5, verbose=True)
 
     # ------------------
     #   Start training
@@ -90,7 +97,7 @@ def run(args: DictConfig):
             
             val_loss.append(F.cross_entropy(y_pred, y).item())
             val_acc.append(accuracy(y_pred, y).item())
-
+            
         print(f"Epoch {epoch+1}/{args.epochs} | train loss: {np.mean(train_loss):.3f} | train acc: {np.mean(train_acc):.3f} | val loss: {np.mean(val_loss):.3f} | val acc: {np.mean(val_acc):.3f}")
         torch.save(model.state_dict(), os.path.join(logdir, "model_last.pt"))
         if args.use_wandb:
@@ -100,8 +107,11 @@ def run(args: DictConfig):
             cprint("New best.", "cyan")
             torch.save(model.state_dict(), os.path.join(logdir, "model_best.pt"))
             max_val_acc = np.mean(val_acc)
-            
-    
+        
+        # スケジューラのステップを更新
+        val_loss_avg = np.mean(val_loss) 
+        scheduler.step(val_loss_avg)
+               
     # ----------------------------------
     #  Start evaluation with best model
     # ----------------------------------
