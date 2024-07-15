@@ -10,13 +10,22 @@ class BasicConvClassifier(nn.Module):
         num_classes: int,
         seq_len: int,
         in_channels: int,
-        hid_dim: int = 128
+        hid_dim: int = 128,
+        rnn_dim: int = 128,
+        num_layers: int = 2,
     ) -> None:
         super().__init__()
 
         self.blocks = nn.Sequential(
             ConvBlock(in_channels, hid_dim),
             ConvBlock(hid_dim, hid_dim),
+        )
+        
+        self.rnn = nn.LSTM(
+            input_size = hid_dim,
+            hidden_size = rnn_dim,
+            num_layers = num_layers,
+            batch_first = True
         )
 
         self.head = nn.Sequential(
@@ -32,7 +41,10 @@ class BasicConvClassifier(nn.Module):
         Returns:
             X ( b, num_classes ): _description_
         """
-        X = self.blocks(X)
+        X = self.conv_blocks(X)  # (b, hid_dim, t)
+        X = X.permute(0, 2, 1)  # (b, t, hid_dim) for RNN
+        X, _ = self.rnn(X)
+        X = X[:, -1, :]  # (b, rnn_dim)
 
         return self.head(X)
 
