@@ -31,7 +31,7 @@ class BasicConvClassifier(nn.Module):
         self.head = nn.Sequential(
             nn.AdaptiveAvgPool1d(1),
             Rearrange("b d 1 -> b d"),
-            nn.Linear(hid_dim, num_classes),
+            nn.Linear(rnn_dim, num_classes),
         )
 
     def forward(self, X: torch.Tensor) -> torch.Tensor:
@@ -41,12 +41,13 @@ class BasicConvClassifier(nn.Module):
         Returns:
             X ( b, num_classes ): _description_
         """
-        X = self.conv_blocks(X)  # (b, hid_dim, t)
+        X = self.blocks(X)  # (b, hid_dim, t)
         X = X.permute(0, 2, 1)  # (b, t, hid_dim) for RNN
         X, _ = self.rnn(X)
         X = X[:, -1, :]  # (b, rnn_dim)
 
-        return self.head(X)
+        X = X.unsqueeze(-1)  # (b, rnn_dim) -> (b, rnn_dim, 1)
+        return self.head(X)  # (b, rnn_dim, 1) -> (b, num_classes)
 
 
 class ConvBlock(nn.Module):
