@@ -1,2 +1,4 @@
 - Base datasetクラスの内容をdatasetクラスにマージした。
 -前処理として、リサンプリング、フィルタリング、スケーリングを行った
+-モデルを1D CNN+RNNに
+-スケジューラとしてReduceLROnPlateauを導入
