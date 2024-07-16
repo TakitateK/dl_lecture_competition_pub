@@ -10,7 +10,7 @@ from glob import glob
 
 
 class ThingsMEGDataset(torch.utils.data.Dataset):
-    def __init__(self, split: str, data_dir: str = "data",sfreq: float = 200.0, l_freq: float = 1.0, h_freq: float = 40.0) -> None:
+    def __init__(self, split: str, data_dir: str = "data",sfreq: float = 200.0, l_freq: float = 1.0, h_freq: float = 50.0) -> None:
         
         assert split in ["train", "val", "test"], f"Invalid split: {split}"
         
@@ -31,11 +31,9 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
     def _fit_scaler(self):
         # 初期スケーリングを実行
         sample_data = []
-        for i in range(min(100, self.num_samples)):  # データセットの最初の100サンプルを使用してスケーラーをフィット
+        for i in range(min(1000, self.num_samples)):  # データセットの最初の1000サンプルを使用してスケーラーをフィット
             X_path = os.path.join(self.data_dir, f"{self.split}_X", str(i).zfill(5) + ".npy")
             X = np.load(X_path).astype(np.float64)  # データを float64 に変換
-            original_sfreq = X.shape[1]  # 元のサンプリング周波数を推定
-            X = resample(X, up=self.sfreq/original_sfreq, npad='auto')  # リサンプリング
             X = filter_data(X, sfreq=self.sfreq, l_freq=self.l_freq, h_freq=self.h_freq)  # フィルタリング
             sample_data.append(X.astype(np.float32))  # データを float32 に変換
         
@@ -48,10 +46,6 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
     def __getitem__(self, i):
         X_path = os.path.join(self.data_dir, f"{self.split}_X", str(i).zfill(5) + ".npy")
         X = np.load(X_path).astype(np.float64)  # データを float64 に変換
-        
-        # リサンプリング
-        original_sfreq = X.shape[1]  # 元のサンプリング周波数を推定
-        X = resample(X, up=self.sfreq/original_sfreq, npad='auto')  # リサンプリング
         
         # フィルタリング
         X = filter_data(X, sfreq=self.sfreq, l_freq=self.l_freq, h_freq=self.h_freq)
