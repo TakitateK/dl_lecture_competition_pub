@@ -34,7 +34,7 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
         for i in range(min(1000, self.num_samples)):  # データセットの最初の1000サンプルを使用してスケーラーをフィット
             X_path = os.path.join(self.data_dir, f"{self.split}_X", str(i).zfill(5) + ".npy")
             X = np.load(X_path).astype(np.float64)  # データを float64 に変換
-            X = filter_data(X, sfreq=self.sfreq, l_freq=self.l_freq, h_freq=self.h_freq)  # フィルタリング
+            X = filter_data(X, sfreq=self.sfreq, l_freq=self.l_freq, h_freq=self.h_freq, filter_length='auto')  # フィルタリング
             sample_data.append(X.astype(np.float32))  # データを float32 に変換
         
         sample_data = np.concatenate(sample_data, axis=1)  # チャネルを維持したままサンプルを連結
@@ -48,7 +48,7 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
         X = np.load(X_path).astype(np.float64)  # データを float64 に変換
         
         # フィルタリング
-        X = filter_data(X, sfreq=self.sfreq, l_freq=self.l_freq, h_freq=self.h_freq)
+        X = filter_data(X, sfreq=self.sfreq, l_freq=self.l_freq, h_freq=self.h_freq, filter_length='auto')
         
         # スケーリング
         X = self.scaler.transform(X.T).T  
