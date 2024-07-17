@@ -80,6 +80,12 @@ class ConvBlock(nn.Module):
 
         self.dropout = nn.Dropout(p_drop)
 
+        # 1x1の畳み込み層を使用してサイズを揃える
+        if in_dim != out_dim:
+            self.residual_conv = nn.Conv1d(in_dim, out_dim, kernel_size=1)
+        else:
+            self.residual_conv = None
+
     def forward(self, X: torch.Tensor) -> torch.Tensor:
         residual = X  # Skip connection
 
@@ -90,6 +96,9 @@ class ConvBlock(nn.Module):
         X = self.conv1(X)
         X = F.gelu(self.batchnorm1(X))
         X = self.dropout(X)
+
+        if self.residual_conv:
+            residual = self.residual_conv(residual)  # サイズを揃える
 
         X += residual  # Skip connection
 
@@ -105,4 +114,5 @@ class AttentionBlock(nn.Module):
         X, _ = self.attention(X, X, X)
         X = self.norm(X)
         return X.mean(dim=1)  # (b, input_dim)
+
 
