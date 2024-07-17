@@ -11,7 +11,8 @@ from termcolor import cprint
 from tqdm import tqdm
 
 #from src.datasets_def import ThingsMEGDataset
-from src.datasets import ThingsMEGDataset
+#from src.datasets import ThingsMEGDataset
+from src.preprocess_datasets import PreprocessedThingsMEGDataset
 
 from src.models import BasicConvClassifier
 #from src.models_def import BasicConvClassifier
@@ -32,11 +33,14 @@ def run(args: DictConfig):
     # ------------------
     loader_args = {"batch_size": args.batch_size, "num_workers": args.num_workers}
     
-    train_set = ThingsMEGDataset("train", args.data_dir)
+    #train_set = ThingsMEGDataset("train", args.data_dir)
+    train_set = PreprocessedThingsMEGDataset("train", "preprocessed_data", args.data_dir)  # ここを変更
     train_loader = torch.utils.data.DataLoader(train_set, shuffle=True, **loader_args)
-    val_set = ThingsMEGDataset("val", args.data_dir)
+    #val_set = ThingsMEGDataset("val", args.data_dir)
+    val_set = PreprocessedThingsMEGDataset("val", "preprocessed_data", args.data_dir)  # ここを変更
     val_loader = torch.utils.data.DataLoader(val_set, shuffle=False, **loader_args)
-    test_set = ThingsMEGDataset("test", args.data_dir)
+    #test_set = ThingsMEGDataset("test", args.data_dir)
+    test_set = PreprocessedThingsMEGDataset("test", "preprocessed_data", args.data_dir)  # ここを変更
     test_loader = torch.utils.data.DataLoader(
         test_set, shuffle=False, batch_size=args.batch_size, num_workers=args.num_workers
     )
