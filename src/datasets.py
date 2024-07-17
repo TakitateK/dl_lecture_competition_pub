@@ -8,6 +8,8 @@ from typing import Tuple
 from termcolor import cprint
 from glob import glob
 
+# ロギングレベルを抑制
+#mne.set_log_level('WARNING')
 
 class ThingsMEGDataset(torch.utils.data.Dataset):
     def __init__(self, split: str, data_dir: str = "data",sfreq: float = 200.0, l_freq: float = 1.0, h_freq: float = 50.0) -> None:
