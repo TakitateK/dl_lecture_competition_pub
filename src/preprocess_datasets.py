@@ -22,12 +22,12 @@ class PreprocessedThingsMEGDataset(Dataset):
         X = np.load(X_path).astype(np.float32)
         X = torch.from_numpy(X).float()
 
-        subject_idx_path = os.path.join(self.original_data_dir, f"{self.split}_subject_idxs", os.path.basename(X_path))
-        subject_idx = torch.from_numpy(np.load(subject_idx_path))
+        #subject_idx_path = os.path.join(self.original_data_dir, f"{self.split}_subject_idxs", os.path.basename(X_path))
+        #subject_idx = torch.from_numpy(np.load(subject_idx_path))
 
         if self.split in ["train", "val"]:
             y_path = os.path.join(self.original_data_dir, f"{self.split}_y", os.path.basename(X_path))
             y = torch.from_numpy(np.load(y_path))
-            return X, y, subject_idx
+            return X, y #subject_idx
         else:
-            return X, subject_idx
+            return X #subject_idx
