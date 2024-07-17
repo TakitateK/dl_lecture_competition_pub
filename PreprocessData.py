@@ -4,6 +4,9 @@ from mne.filter import filter_data
 from sklearn.preprocessing import StandardScaler
 from glob import glob
 
+# ロギングレベルを抑制
+mne.set_log_level('WARNING')
+
 def preprocess_and_save(data_dir, output_dir, sfreq=200.0, l_freq=1.0, h_freq=50.0):
     os.makedirs(output_dir, exist_ok=True)
     
